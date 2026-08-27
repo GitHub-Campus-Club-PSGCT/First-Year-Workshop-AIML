@@ -36,11 +36,10 @@ jobs:
 
             core.setOutput("number", response.data[0].number);
 
-      - name: Enable auto-merge
+      - name: Merge validated PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr merge "${{ steps.pr.outputs.number }}" \
             --repo "${{ github.repository }}" \
-            --squash \
-            --auto
+            --squash
