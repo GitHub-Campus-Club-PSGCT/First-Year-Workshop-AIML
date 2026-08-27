@@ -20,26 +20,24 @@ jobs:
     steps:
       - name: Find associated PR
         id: pr
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: pulls } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              head: `${context.payload.workflow_run.head_repository.full_name}:${context.payload.workflow_run.head_branch}`,
-            });
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          PR_NUMBER=$(gh pr view \
+            "$HEAD_OWNER:$HEAD_BRANCH" \
+            --repo "$REPO" \
+            --json number \
+            --jq '.number')
 
-            const pr = pulls.find(
-              pull => pull.head.sha === context.payload.workflow_run.head_sha
-            );
+          if [ -z "$PR_NUMBER" ]; then
+            echo "::error::No associated PR found."
+            exit 1
+          fi
 
-            if (!pr) {
-              core.setFailed("No associated PR found for this workflow run.");
-              return;
-            }
-
-            core.setOutput("number", pr.number);
+          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
 
       - name: Merge validated PR
         env:
