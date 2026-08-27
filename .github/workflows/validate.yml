@@ -1,0 +1,37 @@
+name: Validate submission
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Keeps a PR from editing workflows / other students' folders / repo
+      # config and then getting auto-merged. This is the only check —
+      # no content validation, everything else passes automatically.
+      - name: Restrict changed paths
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          if echo "$CHANGED" | grep -vE '^submissions/[^/]+/'; then
+            echo "::error::PR touches files outside submissions/<name>/ — rejecting"
+            exit 1
+          fi
+
+          if echo "$CHANGED" | grep -E '^\.github/'; then
+            echo "::error::PR modifies .github/ — rejecting"
+            exit 1
+          fi
