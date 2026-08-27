@@ -29,12 +29,12 @@ jobs:
               run_id: context.payload.workflow_run.id,
             });
 
-            if (response.data.length === 0) {
+            if (response.data.pull_requests.length === 0) {
               core.setFailed("No associated PR found for this workflow run.");
               return;
             }
 
-            core.setOutput("number", response.data[0].number);
+            core.setOutput("number", response.data.pull_requests[0].number);
 
       - name: Enable auto-merge
         env:
