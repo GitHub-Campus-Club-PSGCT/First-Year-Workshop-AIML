@@ -1,28 +1,43 @@
-name: Auto Merge Workshop PRs
+name: Auto-merge validated PRs
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["Validate submission"]
+    types: [completed]
 
 permissions:
-  contents: write
   pull-requests: write
+  contents: write
+  actions: read
 
 jobs:
-  auto-merge:
-    if: github.event.pull_request.head.repo.fork == true
+  automerge:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
-
     steps:
-      - name: Merge workshop PR
+      - name: Find associated PR
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runs = await github.rest.actions.listPullRequestsAssociatedWithWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
+            if (runs.data.length === 0) {
+              core.setFailed("No associated PR found for this workflow run.");
+              return;
+            }
+            core.setOutput("number", runs.data[0].number);
+
+      - name: Enable auto-merge
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
         run: |
-          gh pr merge "$PR_NUMBER" \
-            --repo "$REPO" \
-            --merge \
-            --delete-branch
-
-            
+          gh pr merge "${{ steps.pr.outputs.number }}" \
+            --repo "${{ github.repository }}" \
+            --squash \
+            --auto
