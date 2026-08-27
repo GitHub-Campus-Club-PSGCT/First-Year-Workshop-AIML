@@ -1,6 +1,6 @@
 # Git & GitHub Workshop
 
-> Welcome to the Git & GitHub workshop! 
+> Welcome to the Git & GitHub workshop!
 
 If Git is completely new to you, don't worry — that's exactly what we're here for :)
 
@@ -30,7 +30,7 @@ The repository is intentionally simple.
 
 Here's the basic workflow we'll be working with:
 
-**Make changes → Stage → Commit → Push**
+**Make changes → Stage → Commit → Push → Pull Request**
 
 - **Stage** — Choose the changes you want to include
 - **Commit** — Record those changes in your local Git history
@@ -40,6 +40,25 @@ Here's the basic workflow we'll be working with:
 - **Pull Request** — Ask others to review your changes before merging them
 
 We'll be using the **VS Code interface** throughout the workshop, so you won't need to memorise any commands.
+
+---
+
+## A quick note about Pull Requests
+
+For this workshop, you'll be working from your **own fork** of this repository.
+
+When you open a Pull Request to the workshop repository, an automated check will make sure that the changes in your PR follow the workshop's rules.
+
+For your PR to be accepted, make sure that everything you add or modify is inside your folder under:
+
+```text
+submissions/
+└── your-name/
+```
+
+You can organise your folder however you like — nested folders and files are completely fine.
+
+If the check passes, your PR will be **automatically merged**. If it doesn't, the PR won't be merged, so don't worry if you see a failed check — just take a look at what you changed and ask for help if you're stuck :)
 
 ---
 
